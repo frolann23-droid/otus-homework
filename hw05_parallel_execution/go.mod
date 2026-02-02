@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw05_parallel_execution
+module github.com/frolann23-droid/otus-homework/hw05_parallel_execution
 
 go 1.23
 

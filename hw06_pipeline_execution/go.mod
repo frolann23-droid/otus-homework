@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw06_pipeline_execution
+module github.com/frolann23-droid/otus-homework/hw06_pipeline_execution
 
 go 1.23
 

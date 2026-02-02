@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw11_telnet_client
+module github.com/frolann23-droid/otus-homework/hw11_telnet_client
 
 go 1.23
 

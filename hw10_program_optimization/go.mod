@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw10_program_optimization
+module github.com/frolann23-droid/otus-homework/hw10_program_optimization
 
 go 1.23
 

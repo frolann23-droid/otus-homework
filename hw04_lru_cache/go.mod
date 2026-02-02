@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw04_lru_cache
+module github.com/frolann23-droid/otus-homework/hw04_lru_cache
 
 go 1.23
 

@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw01_hello_otus
+module github.com/frolann23-droid/otus-homework/hw01_hello_otus
 
 go 1.23
 

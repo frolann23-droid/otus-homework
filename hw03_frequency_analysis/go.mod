@@ -1,4 +1,4 @@
-module github.com/frolann23-droid/hw03_frequency_analysis
+module github.com/frolann23-droid/otus-homework/hw03_frequency_analysis
 
 go 1.23
 
