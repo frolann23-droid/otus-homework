@@ -23,44 +23,10 @@ func Run(tasks []Task, n, m int) error {
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
-			for {
-				select {
-				case task, ok := <-tasksCh:
-					if !ok {
-						return
-					}
-
-					if err := task(); err != nil && !ignoreErrors {
-						newErrorCount := atomic.AddInt64(&errorCount, 1)
-						if newErrorCount >= int64(m) {
-							once.Do(func() {
-								close(stopCh)
-							})
-							return
-						}
-					}
-
-				case <-stopCh:
-					return
-				}
-			}
-		}()
+		go startWorker(m, &wg, &once, tasksCh, stopCh, ignoreErrors, &errorCount)
 	}
 
-	go func() {
-		defer close(tasksCh)
-
-		for _, task := range tasks {
-			select {
-			case tasksCh <- task:
-			case <-stopCh:
-				return
-			}
-		}
-	}()
+	sendTasks(tasks, tasksCh, stopCh)
 
 	wg.Wait()
 
@@ -69,4 +35,49 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	return nil
+}
+
+func sendTasks(tasks []Task, tasksCh chan Task, stopCh chan struct{}) {
+	defer close(tasksCh)
+
+	for _, task := range tasks {
+		select {
+		case tasksCh <- task:
+		case <-stopCh:
+			return
+		}
+	}
+}
+
+func startWorker(
+	m int,
+	wg *sync.WaitGroup,
+	once *sync.Once,
+	tasksCh chan Task,
+	stopCh chan struct{},
+	ignoreErrors bool,
+	errorCount *int64,
+) {
+	defer wg.Done()
+
+	for {
+		select {
+		case task, ok := <-tasksCh:
+			if !ok {
+				return
+			}
+
+			if err := task(); err != nil && !ignoreErrors {
+				newErrorCount := atomic.AddInt64(errorCount, 1)
+				if newErrorCount >= int64(m) {
+					once.Do(func() {
+						close(stopCh)
+					})
+					return
+				}
+			}
+		case <-stopCh:
+			return
+		}
+	}
 }
