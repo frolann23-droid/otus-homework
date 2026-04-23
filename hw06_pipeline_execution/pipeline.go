@@ -70,6 +70,6 @@ func runStage(in In, done In, stage Stage) Out {
 }
 
 func drain(ch In) {
-	for range ch {
+	for range ch { //nolint:revive
 	}
 }
