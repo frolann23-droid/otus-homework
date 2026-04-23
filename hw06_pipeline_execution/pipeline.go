@@ -16,15 +16,16 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		for {
 			select {
 			case <-done:
+				drain(in)
 				return
 			case val, ok := <-in:
 				if !ok {
 					return
 				}
-
 				select {
 				case firstIn <- val:
 				case <-done:
+					drain(in)
 					return
 				}
 			}
@@ -32,9 +33,43 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	}()
 
 	currentIn := In(firstIn)
-	for i := 0; i < len(stages); i++ {
-		currentIn = stages[i](currentIn)
+	for _, stage := range stages {
+		currentIn = runStage(currentIn, done, stage)
 	}
 
 	return currentIn
+}
+
+func runStage(in In, done In, stage Stage) Out {
+	out := make(Bi)
+
+	go func() {
+		defer close(out)
+		stageOut := stage(in)
+
+		for {
+			select {
+			case <-done:
+				drain(stageOut)
+				return
+			case val, ok := <-stageOut:
+				if !ok {
+					return
+				}
+				select {
+				case out <- val:
+				case <-done:
+					drain(stageOut)
+					return
+				}
+			}
+		}
+	}()
+
+	return out
+}
+
+func drain(ch In) {
+	for range ch {
+	}
 }
